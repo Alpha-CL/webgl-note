@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>平移坐标系</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500' height='500'></canvas>
+
+
+<script>
+  
+  
+  const canvas = document.getElementById('demo');
+  const ctx = canvas.getContext('2d');
+  
+  ctx.beginPath();
+
+  /**
+   * ctx.createLinearGradient(x0, y0, x1, y1);
+   *
+   * @x0 {number} 开始圆形的 x 轴坐标
+   * @y0 {number} 开始圆形的 y 轴坐标
+   * @x1 {number} 结束圆形的 x 轴坐标
+   * @y1 {number} 结束圆形的 y 轴坐标
+   */
+  const bg = ctx.createLinearGradient(0, 0, 500, 500); // 创建渐变
+  bg.addColorStop(0, 'rgba(0, 0, 0, 1)'); // 设置关键侦的样式
+  bg.addColorStop(1, 'rgba(255, 255, 255, 0)'); // 设置关键侦的样式
+  
+  ctx.fillStyle = bg;
+  ctx.fill(); // 填充指定颜色( 默认填充height )
+  
+  ctx.fillRect(0, 0, 500, 500);
+
+
+</script>
+
+
+</body>
+</html>

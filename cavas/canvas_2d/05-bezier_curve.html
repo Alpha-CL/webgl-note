@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>贝塞尔曲线</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+<canvas id='demo1' width='500px' height='500px'></canvas>
+
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+  
+  
+  ctx.beginPath();
+  ctx.moveTo(50, 50);
+  /**
+   * ctx.quadraticCurveTo(cpx, cpy, x, y);
+   *
+   * @cpx {number} 控制点的 x 轴坐标
+   * @cpy {number} 控制点的 y 轴坐标
+   * @x {number} 终点的 x 轴坐标
+   * @y {number} 终点的 y 轴坐标
+   */
+  // 2次 贝塞尔曲线
+  ctx.quadraticCurveTo(200, 200, 300, 100);
+  ctx.stroke();
+  
+  
+  ctx.beginPath();
+  ctx.moveTo(100, 250);
+  /**
+   * ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+   *
+   * @cp1x {number} 第一个控制点的 x 轴坐标
+   * @cp1y {number} 第一个控制点的 y 轴坐标
+   * @cp2x {number} 对二个控制点的 x 轴坐标
+   * @cp2y {number} 对二个控制点的 y 轴坐标
+   * @x {number} 终点的 x 轴坐标
+   * @y {number} 终点的 y 轴坐标
+   */
+  // 3次 贝塞尔曲线
+  ctx.bezierCurveTo(250, 250, 300, 100, 400, 200);
+  ctx.stroke();
+  
+  
+  const ctx1 = document.getElementById('demo1').getContext('2d');
+  
+  let width = 500,
+    height = 500,
+    offset = 0,
+    num = 1;
+  
+  setInterval(() => {
+    
+    ctx1.clearRect(0, 0, width, height); // 重置画布
+    
+    
+    const randomOffset = Math.sin(num) * 120;
+    console.log('-> randomOffset', randomOffset);
+    
+    ctx1.beginPath();
+    
+    ctx1.moveTo(offset - width, height / 2);
+    ctx1.quadraticCurveTo(
+      width / 4 + offset - width,
+      height / 2 - randomOffset,
+      width / 2 + offset - width,
+      height / 2,
+    );
+    ctx1.quadraticCurveTo(
+      width / 4 * 3 + offset - width,
+      height / 2 + randomOffset,
+      width + offset - width,
+      height / 2,
+    );
+    
+    ctx1.moveTo(offset, height / 2);
+    ctx1.quadraticCurveTo(
+      width / 4 + offset,
+      height / 2 - randomOffset,
+      width / 2 + offset,
+      height / 2,
+    );
+    ctx1.quadraticCurveTo(
+      width / 4 * 3 + offset,
+      height / 2 + randomOffset,
+      width + offset,
+      height / 2,
+    );
+    
+    ctx1.stroke();
+    offset += 1;
+    offset %= 500;
+    
+  }, 1000 / 300);
+
+
+</script>
+
+
+</body>
+</html>

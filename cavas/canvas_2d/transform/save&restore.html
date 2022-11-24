@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>存储/恢复 坐标系快照</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+
+
+  /**
+   * ctx.translate() & ctx.scale() & ctx.rotate() ...
+   *
+   * 影响当前 canvas 的整个坐标系
+   */
+
+  
+  ctx.save(); // 存储当前坐标系快照( 坐标系 平移/旋转/缩放 等状态 )
+  
+  
+  ctx.translate(100, 100);
+  ctx.beginPath();
+  ctx.arc(50, 50, 50, 0, Math.PI * 2);
+  ctx.stroke();
+
+  
+  ctx.restore(); // 根据存储的坐标系快照恢复坐标系
+
+
+  ctx.beginPath();
+  ctx.arc(50, 150, 50, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fill();
+
+
+</script>
+
+
+</body>
+</html>

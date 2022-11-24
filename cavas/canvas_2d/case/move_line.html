@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>运动曲线</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+  
+  let width = 500,
+    height = 500,
+    offset = 0,
+    num = 1;
+  
+  setInterval(() => {
+    
+    ctx.clearRect(0, 0, width, height); // 重置画布
+    
+    
+    const randomOffset = Math.sin(num) * 120;
+    console.log('-> randomOffset', randomOffset);
+    
+    ctx.beginPath();
+    
+    ctx.moveTo(offset - width, height / 2);
+    ctx.quadraticCurveTo(
+      width / 4 + offset - width,
+      height / 2 - randomOffset,
+      width / 2 + offset - width,
+      height / 2,
+    );
+    ctx.quadraticCurveTo(
+      width / 4 * 3 + offset - width,
+      height / 2 + randomOffset,
+      width + offset - width,
+      height / 2,
+    );
+    
+    ctx.moveTo(offset, height / 2);
+    ctx.quadraticCurveTo(
+      width / 4 + offset,
+      height / 2 - randomOffset,
+      width / 2 + offset,
+      height / 2,
+    );
+    ctx.quadraticCurveTo(
+      width / 4 * 3 + offset,
+      height / 2 + randomOffset,
+      width + offset,
+      height / 2,
+    );
+    
+    ctx.stroke();
+    offset += 1;
+    offset %= 500;
+    
+  }, 1000 / 300);
+
+
+</script>
+
+
+</body>
+</html>

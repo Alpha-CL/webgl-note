@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>平移坐标系</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+  
+  
+  ctx.beginPath();
+  
+  
+  // 设置 字体大小 & 字族
+  ctx.font = '50px Generic';
+
+  
+  // 空心字体
+  ctx.strokeStyle = 'rgba(0, 0, 255, 1)'; // 设置边框颜色
+  ctx.strokeText('hello world', 100, 200);
+  
+  
+  // 实体字体
+  ctx.fillStyle = 'rgba(255, 0, 0, 1)';  // 设置填充颜色
+  ctx.fillText('just do it', 100, 300);
+  
+  
+
+</script>
+
+
+</body>
+</html>
