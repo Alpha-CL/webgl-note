@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<meta charset='UTF-8'>
+	<title>点</title>
+	
+	<style>
+		
+		canvas {
+			border: 1px solid;
+		}
+	
+	</style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500' height='500'></canvas>
+
+
+<script>
+	
+	
+	<!-- TODO: 搞清楚变量定义	-->
+	
+	/**
+	 * 变量声明
+	 *
+	 * 存储限定符 + 类型 + 变量名
+	 *
+	 * attribute  vec4 a_Position       // attribute 变量声明
+	 * uniform    vec4 u_FragColor      // uniform 变量声明
+	 */
+	
+	/**
+	 * 着色器变量声明方式 -- 存储限定符（修饰符）
+	 *
+	 * @attribute   只能在 vertexShader 中使用，不能在 fragmentShader 中声明/使用
+	 *              一般用于表示一些顶点数据: 顶点坐标，法线，纹理坐标，顶点颜色等
+	 *
+	 * @uniform     修饰在整个图元被处理的过程中保持不变的全局变量（全局变量）
+	 *
+	 * @varying     可变变量（顶点着色器给片段着色器的传输方式）
+	 *              若在顶点着色器中修改 varying，则片元着色器中可以读取改变后的值
+	 *
+	 * @textures    纹理（数据列，可以随意读取其中的数据，也可以存储颜色以外的其他数据）
+	 */
+	
+	/**
+	 * GLSL ES 数据类型
+	 *
+	 * - 矢量
+	 *   - vec2, vec3, vec4         // 具有 2/3/4 个浮点数元素的矢量
+	 *   - ivec2, ivec3, ivec4      // 具有 2/3/4 个整形元素的矢量
+	 *   - bvec2, bvec3, bvec4      // 具有 2/3/4 个布尔值元素的矢量
+	 *
+	 * - 矩阵（二维数组）
+	 *   - mat2, mat3, mat4         // 2*2，3*3，4*4 的浮点数元素的矩阵（分别具有 4，9，16 个元素）
+	 */
+
+
+</script>
+
+
+<!-- TODO: 搞清楚坐标转换原理 -->
+
+<!-- 顶点着色器内置变量
+	* vec4 gl_Position（必须赋值）                  表示顶点坐标位置
+	* float gl_PontSize（非必须赋值，默认值 1.0）     表示点的尺寸大小（像素）
+-->
+<!-- 着色器语言 不是 js，顶点着色器: 描述顶点信息 -->
+<script type='notjs' id="vertex">
+
+
+	attribute vec2 a_position;  #
+	attribute vec4 a_color;     #
+	uniform vec2 screenSize;    #
+	varying vec4 v_color;       # 全局变量
+
+	void main() {
+		
+		float x = a_position.x * 2.0 / screenSize.x -  1.0;
+		float y = 1.0 - (a_position.y * 2.0 / screenSize.y);
+		
+		gl_Position = vec4(x, y, 0, 1);
+		gl_PointSize = 10.0;
+		
+		v_color = a_color;
+	}
+
+
+</script>
+
+<!-- 片元着色器内置变量
+	* vec4 gl_FragColor     表示指定片元颜色（RGBA格式）
+-->
+<!-- 着色器语言 不是 js，片元着色器: 绘制颜色 -->
+<script type='notjs' id="fragment">
+
+
+	void main() {
+		gl_FragColor = v_color;
+	}
+
+
+</script>
+
+
+<script>
+	
+	
+	/**
+	 * 1. 获取 WebGL 绘图上下文
+	 * 2. 初始化着色器
+	 *    - 初始化顶点着色器
+	 *    - 初始化片元着色器
+	 * 3. 设置点的坐标信息
+	 * 4. 设置 <canvas/> 背景色
+	 * 5. 清空 <canvas/>
+	 * 6. 绘制
+	 */
+	
+	const canvas = document.getElementById('demo') // 获取画布
+	const gl = canvas.getContext('webgl') // 获取画笔
+	
+	!gl && alert('浏览器不支持 webgl')
+	
+	console.log('-> gl', gl)
+	
+	/**
+	 * Create a shader of the specified type
+	 * @param {object} gl canvas webgl context
+	 * @param {GLenum} type Create a specified shader based on this type
+	 * @param {string} source shader source code of string type
+	 */
+	function createShader (gl, type, source) {
+		let shader = gl.createShader(type) // 根据 type 创建创建指定着色器对象
+		gl.shaderSource(shader, source) // 设置 WebGLShader 着色器（顶点着色器及片元着色器）的 GLSL 程序代码
+		gl.compileShader(shader) // 用于编译一个 GLSL 着色器，使其成为为二进制数据，然后就可以被 WebGLProgram 对象所使用
+		const res = gl.getShaderParameter(shader, gl.COMPILE_STATUS) // 返回给定的着色器信息
+		if (res) return shader
+		console.log('-> getShaderInfoLog', gl.getShaderInfoLog(shader)) // 打印包含（警告，调试，编译等）的日志记录
+	}
+	
+	const vertexStr = document.getElementById('vertex').innerText  // 获取顶点着色器字符串
+	const fragmentStr = document.getElementById('fragment').innerText // 获取片元着色器字符串
+	// console.log('-> vertexStr', vertexStr)
+	// console.log('-> fragmentStr', fragmentStr)
+	
+	const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexStr) // 创建顶点着色器
+	const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentStr) // 创建片元着色器
+	console.log('-> vertexShader', vertexShader)
+	console.log('-> fragmentShader', fragmentShader)
+	
+	/**
+	 * Create a program
+	 * @param {object} gl canvas webgl context
+	 * @param {object} vertexShader vertex shader context
+	 * @param {object} fragmentShader fragment shader context
+	 */
+	function createProgram (gl, vertexShader, fragmentShader) {
+		let program = gl.createProgram() // 用于创建和初始化一个 WebGLProgram 对象
+		gl.attachShader(program, vertexShader) // 添加一个片段或者顶点着色器
+		gl.attachShader(program, fragmentShader) // 添加一个片段或者顶点着色器
+		gl.linkProgram(program) // 链接给定的 WebGLProgram，从而完成为程序的 片元 和 顶点着色器 准备 GPU 代码的过程
+		let res = gl.getProgramParameter(program, gl.LINK_STATUS)
+		if (res) return program
+		console.log('-> getProgramInfoLog', gl.getProgramInfoLog(program)) // 打印包含（警告，调试，编译等）的日志记录
+	}
+	
+	let program = createProgram(gl, vertexShader, fragmentShader) //
+	gl.useProgram(program) // 将定义好的 WebGLProgram 对象添加到当前的渲染状态中
+	
+	gl.clearColor(0, 0, 1, 1) // 用于设置清空颜色缓冲时的颜色值
+	gl.clear(gl.COLOR_BUFFER_BIT) // 使用预设值来清空缓冲
+	
+	let a_position = gl.getAttribLocation(program, 'a_position')
+	let screenSize = gl.getUniformLocation(program, 'screenSize')
+	gl.uniform2f(screenSize, canvas.width, canvas.height)
+	
+	function bindEvent () {
+		let pointArr = []
+		canvas.onmousedown = function (e) {
+			let x = e.offsetX
+			let y = e.offsetY
+			console.log('-> x, y', x, y)
+			gl.vertexAttrib3f(a_position, x, y, 0.0)
+			gl.drawArrays(gl.POINTS, 0, 1)
+		}
+	}
+	
+	bindEvent()
+
+
+</script>
+
+</body>
+</html>
