@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>根据颜色绘制背景</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500' height='500'></canvas>
+
+
+<script type='notjs' id='vertexShader'>
+  
+  
+  void main() {
+  
+    float x = 50.0;
+    float y = 50.0;
+    float z = 0.0;
+    float a = 0.0;
+    
+    gl_Position = vec4(x, y, z, a);
+    gl_PointSize = 10.0;
+  }
+
+
+</script>
+
+<script type='notjs' id='fragmentShader'>
+
+
+  precision mediump float;
+
+  void main() {
+  
+    float r = 0.0;
+    float g = 0.0;
+    float b = 1.0;
+    float a = 1.0;
+    
+    gl_FragColor = vec4(r, g, b, a);
+  }
+
+
+</script>
+
+<script>
+  
+  
+  /**
+   * 1. 获取 WebGL 绘图上下文
+   * 2. 初始化着色器
+   *    - 初始化顶点着色器
+   *    - 初始化片元着色器
+   * 3. 设置点的坐标信息
+   * 4. 设置 <canvas/> 背景色
+   * 5. 清空 <canvas/>
+   * 6. 绘制
+   */
+  
+  const canvas = document.getElementById('demo'); // 获取画布
+  const gl = canvas.getContext('webgl'); // 获取画布上下文
+  
+  !gl && alert('浏览器不支持 webgl');
+  console.log('-> ctx', gl);
+  
+  /**
+   * Create a shader of the specified type
+   * @param {object} gl canvas webgl context
+   * @param {GLenum} type Create a specified shader based on this type
+   * @param {string} source shader source code of string type
+   */
+  function createShader(gl, type, source) {
+    let shader = gl.createShader(type); // 根据 type 创建创建指定着色器对象
+    if (shader === null) {
+      console.error('Could not create shader');
+      return;
+    }
+    gl.shaderSource(shader, source); // 设置 WebGLShader 着色器（顶点着色器及片元着色器）的 GLSL 程序代码
+    gl.compileShader(shader); // 用于编译一个 GLSL 着色器，使其成为为二进制数据，然后就可以被 WebGLProgram 对象所使用
+    const res = gl.getShaderParameter(shader, gl.COMPILE_STATUS); // 返回给定的着色器信息
+    if (res) return shader;
+    console.log('-> getShaderInfoLog: ', gl.getShaderInfoLog(shader)); // 打印包含（警告，调试，编译等）的日志记录
+  }
+  
+  // 获取着色器源码
+  const vertexStr = document.getElementById('vertexShader').innerText; // 获取顶点着色器 源码字符串
+  const fragmentStr = document.getElementById('fragmentShader').innerText; // 获取片元着色器 源码字符串
+  
+  // 创建着色器
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexStr); // 创建顶点着色器
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentStr); // 创建片元着色器
+  
+  /**
+   * Create a program
+   * @param {object} gl canvas webgl context
+   * @param {object} vertexShader vertex shader context
+   * @param {object} fragmentShader fragment shader context
+   */
+  function createProgram(gl, vertexShader, fragmentShader) {
+    let program = gl.createProgram(); // 用于创建和初始化一个 WebGLProgram 对象
+    if (program === null) {
+      console.error('Could not create program');
+      return;
+    }
+    gl.attachShader(program, vertexShader); // 添加一个片段或者顶点着色器
+    gl.attachShader(program, fragmentShader); // 添加一个片段或者顶点着色器
+    gl.linkProgram(program); // 链接给定的 WebGLProgram，从而完成为程序的 片元 和 顶点着色器 准备 GPU 代码的过程
+    const res = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (res) return program;
+    console.log('-> getProgramInfoLog: ', gl.getProgramInfoLog(program)); // 打印包含（警告，调试，编译等）的日志记录
+  }
+  
+  const program = createProgram(gl, vertexShader, fragmentShader); // 根据 顶点着色器 + 片元着色器 创建 webgl应用
+  
+  gl.useProgram(program);             // 将定义好的 WebGLProgram 对象添加到当前的渲染状态中
+  const r = 0.5;
+  const g = 0.5;
+  const b = 0.5;
+  const a = 1.0;
+  gl.clearColor(r, g, b, a);          // 用于设置清空颜色缓冲时的颜色值
+  /**
+   * @param {string} mask
+   *  - gl.COLOR_BUFFER_BIT  颜色缓冲区
+   *  - gl.DEPTH_BUFFER_BIT 深度缓冲区
+   *  - gl.STENCIL_BUFFER_BIT 模版缓冲区
+   */
+  gl.clear(gl.COLOR_BUFFER_BIT);      // 使用预设值来清空缓冲
+  
+  /**
+   * @param {GLenum} mode
+   *    - gl.POINTS           // 绘制点
+   *    - gl.TRIANGLES        // 绘制三角形
+   *    - ...
+   * @param {GLint} first     // 从第几个点开始绘制
+   * @param {GLsizei} count   // 绘制点的个数
+   */
+  gl.drawArrays(gl.POINTS, 0, 0);
+
+  
+</script>
+
+</body>
+</html>

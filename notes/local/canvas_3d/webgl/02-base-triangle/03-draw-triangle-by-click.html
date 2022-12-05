@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>点击绘制三角形</title>
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+</head>
+<body>
+
+<script type='notjs' id='vertexShader'>
+  
+  
+  attribute vec2 a_Position;
+  attribute vec4 a_Color;
+  attribute float PointSize;
+  uniform vec2 u_ScreenSize;
+  varying vec4 v_Color;
+
+  void main() {
+   
+    float x = a_Position.x * 2.0 / u_ScreenSize.x - 1.0;
+    float y = 1.0 - (a_Position.y * 2.0 / u_ScreenSize.y);
+    float z = 0.0;
+    float a = 1.0;
+    
+    gl_Position = vec4(x, y, z, a);
+    gl_PointSize = PointSize;
+    v_Color = a_Color;
+  }
+  
+
+</script>
+
+<script type='notjs' id='fragmentShader'>
+  
+  
+  precision mediump float;
+  
+  varying vec4 v_Color;
+  
+  void main() {
+    // gl_FragColor = vec4(0, 0, 1, 1);
+    gl_FragColor = v_Color;
+  }
+
+
+</script>
+
+<canvas id='canvas' width='500' height='500'></canvas>
+
+<script type='module'>
+  
+  
+  import { WebGLProgram } from '../webglProgram.js';
+  import { randomColor } from '../utils.js';
+  
+  const webglProgram = new WebGLProgram();
+  const canvas = webglProgram.canvas;
+  const gl = webglProgram.gl;
+  
+  const a_Position = webglProgram.getAttributeByKey('a_Position');
+  const a_Color = webglProgram.getAttributeByKey('a_Color');
+  const PointSize = webglProgram.getAttributeByKey('PointSize');
+  const u_FragColor = webglProgram.getUniformByKey('u_FragColor');
+  
+  const webglBuffer = gl.createBuffer();
+  
+  gl.bindBuffer(gl.ARRAY_BUFFER, webglBuffer);
+  
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    150, 300, 10.0,
+    300, 150, 20.0,
+    150, 150, 30.0,
+  ]), gl.STATIC_DRAW);
+  
+  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 4 * 3, 0);
+  
+  gl.enableVertexAttribArray(a_Position);
+  gl.enableVertexAttribArray(PointSize);
+  
+  function bindEvent() {
+    
+    const points = [];
+    const SHAPE_POINT_COUNT = 3;
+    const ARRAY_CELL_BYTE = 4;
+    
+    canvas.onmousedown = (e) => {
+      
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      points.push(x, y, 10.0);
+      
+      if (points.length % SHAPE_POINT_COUNT === 0) {
+        
+        console.log('-> info', x, y);
+        console.log('-> points', points);
+        
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
+        
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, ARRAY_CELL_BYTE * SHAPE_POINT_COUNT, 0);
+        gl.vertexAttribPointer(PointSize, 1, gl.FLOAT, false, ARRAY_CELL_BYTE * SHAPE_POINT_COUNT, ARRAY_CELL_BYTE * 2);
+        
+        const { r, g, b, a } = randomColor();
+        gl.vertexAttrib4f(a_Color, r, g, b, a);
+        
+        gl.enableVertexAttribArray(a_Position);
+        gl.enableVertexAttribArray(PointSize);
+        
+        gl.drawArrays(gl.TRIANGLES, 0, points.length / SHAPE_POINT_COUNT);
+      }
+    };
+  }
+  
+  bindEvent();
+
+
+</script>
+
+</body>
+</html>

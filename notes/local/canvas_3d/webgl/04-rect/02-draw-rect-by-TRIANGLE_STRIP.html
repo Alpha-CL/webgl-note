@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>使用 三角形带 绘制矩形</title>
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+</head>
+<body>
+
+<script type='notjs' id='vertexShader'>
+  
+  
+  attribute vec2 a_Position;
+  attribute vec4 a_Color;
+  attribute float PointSize;
+  uniform vec2 u_ScreenSize;
+  varying vec4 v_Color;
+
+  void main() {
+   
+    float x = a_Position.x * 2.0 / u_ScreenSize.x - 1.0;
+    float y = 1.0 - (a_Position.y * 2.0 / u_ScreenSize.y);
+    float z = 0.0;
+    float a = 1.0;
+    
+    gl_Position = vec4(x, y, z, a);
+    gl_PointSize = PointSize;
+    v_Color = a_Color;
+  }
+  
+
+</script>
+
+<script type='notjs' id='fragmentShader'>
+  
+  
+  precision mediump float;
+  
+  varying vec4 v_Color;
+  
+  void main() {
+    // gl_FragColor = vec4(0, 0, 1, 1);
+    gl_FragColor = v_Color;
+  }
+
+
+</script>
+
+<canvas id='canvas' width='500' height='500'></canvas>
+
+<script type='module'>
+  
+  import { WebGLProgram } from '../webglProgram.js';
+  import { randomColor } from '../utils.js';
+  
+  
+  const webglProgram = new WebGLProgram();
+  const canvas = webglProgram.canvas;
+  const gl = webglProgram.gl;
+  
+  
+  const a_Position = webglProgram.getAttributeByKey('a_Position');
+  const a_Color = webglProgram.getAttributeByKey('a_Color');
+  const PointSize = webglProgram.getAttributeByKey('PointSize');
+  const u_FragColor = webglProgram.getUniformByKey('u_FragColor');
+  
+  /**
+   * 矩形绘制( 三维 )
+   *
+   * 正面: 逆时针书写坐标点的坐标
+   * 背面: 顺时针书写坐标点的坐标
+   */
+  
+  /**
+   * gl.TRIANGLE_STRIP vs gl.TRIANGLE_FAN
+   *
+   ** TRIANGLE_STRIP:
+   *    - 以第一个点为中心
+   *    - 每两个点 + 第一个点 形成一个三角形
+   *
+   ** TRIANGLE_FAN:
+   *    - 每增加一个点 + 较近的两个点 形成一个三角形
+   */
+  
+  // 根据 索引buffer 绘制矩形( 减少冗余点的代码 )
+  (function draw() {
+  
+    const ARRAY_CELL_BYTE = 4;      // 数组单个子项字节数
+    const SHAPE_POINT_COUNT = 5;    // 定义每个形状需要多少个数组的子项
+    
+    const positionBuffer = gl.createBuffer();
+    const indexBuffer = gl.createBuffer();
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  
+    //
+    //     0:(50, 50)                           3:(150, 50)
+    //        + -------------------------------- +
+    //        |                                  |
+    //        |                                  |
+    //        |                +                 |
+    //        |            4:(100, 75)           |
+    //        |                                  |
+    //        + -------------------------------- +
+    //    1:(50, 100)                           2:(150, 100)
+    //
+    
+    const points = new Float32Array([
+  //  x， y,      r, g, b,
+      50, 50,     1, 1, 0,        // 0
+      50, 100,    0, 1, 0,        // 1
+      150, 100,   1, 0, 1,        // 2
+      150, 50,    0, 0, 1,        // 3
+    ]);
+  
+    gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
+    
+    // 根据该索引顺序绘制
+    // 每三个点形成一个三角形 0,1,2 - 2,3,0
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([
+      0, 1, 2,
+      2, 3, 0
+    ]), gl.STATIC_DRAW);
+    
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, ARRAY_CELL_BYTE * SHAPE_POINT_COUNT, 0);
+    gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, ARRAY_CELL_BYTE * SHAPE_POINT_COUNT, ARRAY_CELL_BYTE * 2);
+    
+    gl.enableVertexAttribArray(a_Position);
+    gl.enableVertexAttribArray(a_Color);
+    
+    /**
+     * @param {GLenum} mode 指定绘制图元的类型
+     * @param {GLsizei} count 指定绘制图形顶点的数量
+     * @param {GLenum} type 指定索引缓冲区值的类型
+     *  * 常用值类型
+     *    - gl.UNSIGNED_BYTE 无符号 8位 整型
+     *    - gl.UNSIGNED_SHORT 无符号 16位 短整型
+     * @param {GLintptr} offset 指定索引数组中开始绘制的位置( 以字节为单位 )
+     */
+    gl.drawElements(gl.TRIANGLE_STRIP, 6, gl.UNSIGNED_SHORT, 0);
+    /**
+     * @param {GLenum} mode 指定绘制图元的类型
+     * @param {GLint} first 指定索引数组中开始绘制的位置( 以字节为单位 )
+     * @param {GLsizei} count 指定绘制图形顶点的数量
+     */
+    // gl.drawArrays(gl.TRIANGLES, 0, 5);
+  
+  }());
+
+
+</script>
+
+</body>
+</html>

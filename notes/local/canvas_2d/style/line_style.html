@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>线端样式</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+  
+  
+  ctx.beginPath();
+  
+  ctx.lineWidth = 20;
+  ctx.moveTo(100, 100);
+  ctx.lineTo(350, 100);
+  
+  /**
+   * ctx.lineCap = 'type';
+   *
+   * @type {string}
+   *    - butt:   线段末端以方形结束
+   *    - round:  线段末端以圆形结束
+   *    - square: 线段末端以方形结束，但是增加了一个宽度和线段相同，高度是线段厚度一半的矩形区域
+   */
+  ctx.lineCap = 'butt'; // 设置线端样式
+  
+  ctx.stroke();
+  
+  
+  ctx.beginPath();
+  ctx.lineWidth = 20;
+  ctx.moveTo(100, 200);
+  ctx.lineTo(350, 200);
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+
+  ctx.beginPath();
+  ctx.lineWidth = 20;
+  ctx.moveTo(100, 300);
+  ctx.lineTo(350, 300);
+  ctx.lineCap = 'square';
+  ctx.stroke();
+
+
+</script>
+
+
+
+<canvas id='demo1' width='500px' height='500px'></canvas>
+
+<script>
+  
+  
+  const ctx1 = document.getElementById('demo1').getContext('2d');
+  
+  
+  ctx1.beginPath();
+  
+  ctx1.lineWidth = 20;
+  ctx1.moveTo(100, 100);
+  ctx1.lineTo(350, 100);
+  ctx1.lineTo(350, 400);
+  ctx1.closePath();
+  
+  /**
+   * ctx1.lineCap = 'type';
+   *
+   * @type {string}
+   *    - bevel:  线段末端以方形结束
+   *    - round:  线段末端以圆形结束
+   *    - miter:  线段末端以方形结束，但是增加了一个宽度和线段相同，高度是线段厚度一半的矩形区域
+   */
+  ctx1.lineJoin = 'round'; // 设置线端样式
+  ctx1.miterLimit = 5; // 设置线端长度
+  
+  ctx1.stroke();
+
+</script>
+
+
+</body>
+</html>

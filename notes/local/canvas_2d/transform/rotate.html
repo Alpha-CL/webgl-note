@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>旋转</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+<canvas id='demo' width='500px' height='500px'></canvas>
+
+<script>
+  
+  
+  const ctx = document.getElementById('demo').getContext('2d');
+  
+  
+  ctx.beginPath();
+  ctx.translate(250, 250);
+  
+  
+  /**
+   * ctx.rotate(angle);       // 影响当前 canvas 的整个坐标系
+   *
+   * @angle {number} 旋转的角度
+   *
+   * 将当前绘制子路旋转指定角度
+   ** 默认旋转中心点是 canvas 的起始点
+   */
+  ctx.rotate(Math.PI / 6);
+  
+  
+  ctx.moveTo(0, 0);
+  ctx.lineTo(200, 0);
+  
+  
+  ctx.stroke();
+
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>根据点击绘制点</title>
+  
+  <style>
+    
+    canvas {
+      border: 1px solid;
+    }
+  
+  </style>
+
+</head>
+<body>
+
+
+<canvas id='canvas' width='500' height='500'></canvas>
+
+
+<script type='notjs' id='vertexShader'>
+
+
+  attribute vec2 a_Position;
+  attribute vec4 a_Color;
+  
+  uniform vec2 u_ScreenSize;
+  
+  varying vec4 v_Color;
+
+  void main() {
+   
+    float x = a_Position.x * 2.0 / u_ScreenSize.x - 1.0;
+    float y = 1.0 - (a_Position.y * 2.0 / u_ScreenSize.y);
+    
+    // gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+    
+    gl_Position = vec4(x, y, 0.0, 1.0);
+    gl_PointSize = 10.0;
+    v_Color = a_Color;
+  }
+
+
+</script>
+
+<script type='notjs' id='fragmentShader'>
+
+
+  precision mediump float;
+  
+  varying vec4 v_Color;
+
+  void main() {
+    // gl_FragColor = vec4(0, 0, 0, 1);
+    gl_FragColor = v_Color;
+  }
+
+
+</script>
+
+<script>
+  
+  
+  function randomColor() {
+    const r = Math.random().toFixed(2);
+    const g = Math.random().toFixed(2);
+    const b = Math.random().toFixed(2);
+    const a = (0.5 + Math.random() * 0.5).toFixed(2);
+    return { r, g, b, a };
+  }
+  
+  const canvas = document.getElementById('canvas');
+  const gl = canvas.getContext('webgl');
+  
+  !gl && alert('浏览器不支持 webgl');
+  console.log('-> gl', gl);
+  
+  function createShader(gl, type, source) {
+    let shader = gl.createShader(type);
+    if (shader === null) {
+      console.error('Could not create shader');
+      return;
+    }
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    const res = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (res) return shader;
+    console.log('-> getShaderInfoLog: ', gl.getShaderInfoLog(shader));
+  }
+  
+  const vertexStr = document.getElementById('vertexShader').innerText;
+  const fragmentStr = document.getElementById('fragmentShader').innerText;
+  
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexStr);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentStr);
+  
+  function createProgram(gl, vertexShader, fragmentShader) {
+    let program = gl.createProgram();
+    if (program === null) {
+      console.error('Could not create program');
+      return;
+    }
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    const res = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (res) return program;
+    console.log('-> getProgramInfoLog: ', gl.getProgramInfoLog(program));
+  }
+  
+  const program = createProgram(gl, vertexShader, fragmentShader);
+  
+  gl.useProgram(program);
+  const r = 1.0;
+  const g = 1.0;
+  const b = 1.0;
+  const a = 1.0;
+  gl.clearColor(r, g, b, a);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  const a_Position = gl.getAttribLocation(program, 'a_Position');
+  const a_Color = gl.getAttribLocation(program, 'a_Color');
+  const u_ScreenSize = gl.getUniformLocation(program, 'u_ScreenSize');
+  
+  gl.uniform2f(u_ScreenSize, canvas.width, canvas.height);
+  
+  // 添加点击事件
+  (function() {
+    
+    let points = [];
+    
+    canvas.onmousedown = function(e) {
+      
+      // 重置画布颜色
+      gl.clearColor(1, 1, 1, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      
+      // 获取 x, y，color 数据
+      let x = e.offsetX;
+      let y = e.offsetY;
+      let color = randomColor();
+      
+      // 保存 x, y，color 数据
+      points.push({ x, y, color });
+      console.log('-> x, y', x, y);
+      
+      for (let i = 0; i < points.length; i++) {
+        
+        // 结构指定点的数据
+        const {
+          x: pointX,
+          y: pointY,
+          color: { r, g, b, a },
+        } = points[i];
+        
+        console.log('-> color', `rgba(${ r }, ${ g }, ${ b }, ${ a })`);
+        
+        // 点坐标赋值
+        gl.vertexAttrib2f(a_Position, pointX, pointY);
+        // 点颜色赋值
+        gl.vertexAttrib4f(a_Color, r, g, b, a);
+        
+        // 根据 x, y, color 绘制点
+        gl.drawArrays(gl.POINTS, 0, 1);
+      }
+    };
+    
+  })();
+
+</script>
+
+</body>
+</html>
