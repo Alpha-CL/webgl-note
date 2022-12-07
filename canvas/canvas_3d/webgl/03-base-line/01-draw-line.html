@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
   <meta charset='UTF-8'>
-  <title>点击绘制三角形</title>
+  <title>绘制线</title>
   <style>
     
     canvas {
@@ -50,6 +50,7 @@
   }
 
 
+
 </script>
 
 <canvas id='canvas' width='500' height='500'></canvas>
@@ -57,38 +58,81 @@
 <script type='module'>
   
   
-  import { WebGLProgram } from '../webglProgram.js';
+  import { WebGLProgram } from '../webglProgram.d.ts';
   import { randomColor } from '../utils.js';
   
   const webglProgram = new WebGLProgram();
   const canvas = webglProgram.canvas;
   const gl = webglProgram.gl;
   
+  console.log('-> webglProgram', webglProgram);
+  
   const a_Position = webglProgram.getAttributeByKey('a_Position');
   const a_Color = webglProgram.getAttributeByKey('a_Color');
   const PointSize = webglProgram.getAttributeByKey('PointSize');
   const u_FragColor = webglProgram.getUniformByKey('u_FragColor');
   
+  /**
+   * gl.createBuffer();
+   * 创建并初始化一个用于储存顶点数据或着色数据的 WebGLBuffer对象
+   */
   const webglBuffer = gl.createBuffer();
   
+  /**
+   * gl.bindBuffer();
+   * 将 WebGLBuffer对象 绑定到 目标
+   *
+   * @param {GLenum} target 目标
+   * @param {WebGLBuffer | null} buffer buffer对象
+   */
   gl.bindBuffer(gl.ARRAY_BUFFER, webglBuffer);
   
+  /**
+   * gl.bufferData();
+   * 创建并初始化了 Buffer对象 的数据存储区
+   *
+   * @param {GLenum} target 指定 Buffer 绑定点( 目标 )
+   * @param {GLsizeiptr} size 设定 Buffer对象 的数据存储区大小
+   * @param {GLenum} usage 指定数据存储区的使用方法
+   ** 有多种重载的构造方法
+   */
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
     150, 300, 10.0,
     300, 150, 20.0,
     150, 150, 30.0,
   ]), gl.STATIC_DRAW);
   
+  /**
+   * gl.vertexAttribPointer();
+   * 告诉显卡从当前绑定的缓冲区( bindBuffer()指定的缓冲区 )中读取顶点数据
+   *
+   * @param {GLuint} index 指定要修改的顶点属性的索引
+   * @param {GLint} size 指定每个顶点属性的组成数量，必须是 1，2，3 或 4
+   * @param {GLenum} type 指定数组中每个元素的数据类型
+   * @param {GLboolean} normalized 当转换为浮点数时是否应该将整数数值归一化到特定的范围
+   * @param {GLsizei} stride 以字节为单位指定连续顶点属性开始之间的偏移量
+   * @param {GLintptr} offset 指定顶点属性数组中第一部分的字节偏移量。必须是类型的字节长度的倍数
+   */
   gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 4 * 3, 0);
+  // gl.vertexAttribPointer(PointSize, 1, gl.FLOAT, false, 4 * 3, 4 * 2);
   
+  /**
+   * gl.enableVertexAttribArray();
+   * 开启属性数组列表中指定索引处的通用顶点属性数组
+   *
+   * @param {GLuint} index 索引，指向要激活的顶点属性
+   */
   gl.enableVertexAttribArray(a_Position);
   gl.enableVertexAttribArray(PointSize);
+  
   
   function bindEvent() {
     
     const points = [];
-    const SHAPE_POINT_COUNT = 3;
-    const ARRAY_CELL_BYTE = 4;
+    
+    const SHAPE_POINT_COUNT = 3;  // 当前形状所需点的个数
+    const ARRAY_CELL_BYTE = 4;     // Float32Array 中单个子项占 4个 字节
+    const POINT_SIZE = 10.0;      // 点的大小
     
     canvas.onmousedown = (e) => {
       
@@ -98,10 +142,11 @@
       const x = e.clientX;
       const y = e.clientY;
       
-      points.push(x, y, 10.0);
+      points.push(x, y, POINT_SIZE);
       
       if (points.length % SHAPE_POINT_COUNT === 0) {
         
+        console.log('-> points', points);
         console.log('-> info', x, y);
         console.log('-> points', points);
         
@@ -116,7 +161,14 @@
         gl.enableVertexAttribArray(a_Position);
         gl.enableVertexAttribArray(PointSize);
         
-        gl.drawArrays(gl.TRIANGLES, 0, points.length / SHAPE_POINT_COUNT);
+        /**
+         * line_type
+         *
+         * 1. gl.LINES            // 单个线条
+         * 2. gl.LINE_STRIP       // 连续的线条
+         * 2. gl.LINE_LOOP        // 闭合的线条
+         */
+        gl.drawArrays(gl.LINES, 0, points.length / SHAPE_POINT_COUNT);
       }
     };
   }
