@@ -149,8 +149,8 @@
   
   (function draw() {
     
-    const CENTER_POINT_X = 100;         // 圆心 x坐标
-    const CENTER_POINT_Y = 100;         // 圆心 y坐标
+    const CENTER_POINT_X = 250;         // 圆心 x坐标
+    const CENTER_POINT_Y = 250;         // 圆心 y坐标
     const OUTER_CIRCLE_RADIUS = 100;    // 外圆 半径
     const INNER_CIRCLE_RADIUS = 50;     // 内圆 半径
     const TRIANGLE_COUNT = 100;         // 分成多少个三角形
@@ -195,7 +195,6 @@
      * @param {GLintptr} offset 指定索引数组中开始绘制的位置( 以字节为单位 )
      */
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-    console.log("-> indices.length", indices.length , indices.length / 3);
   
   }());
 
